@@ -1,0 +1,13 @@
+# Runtime / generated — do not commit
+leads.csv
+outputs/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit/secrets.toml
+
+# Personal data — not needed by the web app (built from the form)
+data/profile.csv
+
+# OS cruft
+.DS_Store

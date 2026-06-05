@@ -1,0 +1,17 @@
+# Streamlit configuration (theme + server). Picked up when the app runs from this
+# directory. On Streamlit Community Cloud, theme settings apply; server settings are
+# largely managed by the platform.
+
+[theme]
+primaryColor = "#2e7d52"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f2f7f4"
+textColor = "#1c2b24"
+font = "sans serif"
+
+[server]
+headless = true
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
