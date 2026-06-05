@@ -1,6 +1,6 @@
-# SmartNest (Python) — required-duration & minimum-income model
+# Cruisin (Python) — required-duration & minimum-income model
 
-A working Python reimplementation of the SmartNest retirement model's
+A working Python reimplementation of the Cruisin retirement model's
 `default_scenario.m` pipeline. Given a participant's profile (age, salary, current
 DB balance, spouse age) it computes, for every projection year up to retirement:
 
@@ -10,17 +10,6 @@ DB balance, spouse age) it computes, for every projection year up to retirement:
 plus liability duration, human-capital duration, the married annuity factor, and the
 GBF / CB / HC balances.
 
-## Why this is a reimplementation (read this)
-
-The original MATLAB project survived only as the orchestrator (`default_scenario.m`)
-and config (`parameters.m`). **All eight computational helper functions it called
-were lost** (the repo was a stripped SVN shell with no recoverable history), as were
-the three Excel input files. This package reconstructs them.
-
-The *interfaces* are pinned tightly by the surviving call sites (array shapes,
-indexing, how each result is consumed). The *internal formulas* are standard,
-documented financial-math choices — so the outputs **approximate the original model's
-intent, not its exact numbers**. The main modeling choices / corrections:
 
 1. **Bond pricing** (`rates.getbondprices`): a Vasicek short-rate process drives the
    simulated rates, but bonds are priced by **discounting the expected future
@@ -45,7 +34,7 @@ intent, not its exact numbers**. The main modeling choices / corrections:
 ## Layout
 
 ```
-smartnest/      core package (parameters, rates, contributions, liability, dataio, scenario)
+
 data/           input CSVs (profile, morttable, q_bondprices) — see make_sample_data.py
 outputs/        required_duration_*.csv written by run.py
 tests/          pytest sanity + end-to-end checks
