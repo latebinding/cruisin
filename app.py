@@ -86,14 +86,15 @@ with st.form("profile_form"):
     with c2:
         savings = st.number_input("Current savings ($)", min_value=0, value=1000000,
                                   step=1000)
+        has_spouse = st.checkbox("Include a spouse/partner", value=True)
         spouse_age = st.number_input("Spouse age", min_value=18, max_value=100,
-                                     value=44, step=1)
+                                     value=44, step=1, disabled=not has_spouse)
     submitted = st.form_submit_button("Calculate")
 
 if submitted:
     st.session_state.profile = (
         1, int(age), float(salary), 1 if gender == "Male" else 2,
-        float(savings), int(spouse_age),
+        float(savings), int(spouse_age) if has_spouse else None,
     )
 
 profile = st.session_state.get("profile")
@@ -105,12 +106,17 @@ if profile:
     m1, m2, m3 = st.columns(3)
     m1.metric("Required CB duration", f"{retire_row['CB duration (yrs)']:.1f} yrs")
     m2.metric("Liability duration", f"{retire_row['Liability duration (yrs)']:.1f} yrs")
-    m3.metric("Minimum income / yr", f"${retire_row['Min income / yr']:,.0f}")
-    st.caption("Minimum income is a projection under the model's default contribution "
-               "assumptions.")
+    m3.metric("Minimum income / yr *", f"${retire_row['Min income / yr']:,.0f}")
 
     with st.expander("Year-by-year detail"):
-        st.dataframe(df, hide_index=True, width="stretch")
+        df_show = df.copy()
+        df_show["Min income / yr *"] = df_show.pop("Min income / yr").map(
+            lambda x: f"${x:,.0f}")
+        st.dataframe(df_show, hide_index=True, width="stretch")
+        st.caption(
+            "\\* The minimum income per year figure is simply the future, "
+            "inflation-boosted price tag required when you retire to buy the exact same "
+            "standard of living that a normal, comfortable salary buys you today.")
         st.line_chart(df.set_index("Age")["Min income / yr"])
 
     # ---------------------------------------------------------------- email gate
@@ -130,8 +136,9 @@ if profile:
             else:
                 st.error("Please enter a valid email address.")
     else:
-        target = st.slider("Target replacement rate", min_value=0.50, max_value=0.90,
-                           value=0.70, step=0.05, format="%.0f%%")
+        target_pct = st.slider("Target replacement rate", min_value=50, max_value=90,
+                                value=70, step=5, format="%d%%")
+        target = target_pct / 100.0
         with st.spinner("Calculating required savings rate…"):
             table = savings_table(profile, target)
         st.dataframe(table, hide_index=True, width="stretch")

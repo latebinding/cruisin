@@ -64,18 +64,28 @@ def marriedlduration(mort: np.ndarray, age: int, retireage: int, maxage: int,
 
     with ``w_n = S_x*S_y + jsratio*(S_x + S_y - 2 S_x S_y)`` and ``df_n = bp_year[n]``.
     ``n`` runs from years-to-retirement out to the end of the mortality table / curve.
+
+    If ``spage`` is None there is no spouse: the annuity is single-life on the
+    participant, ``w_n = S_x`` (``jsratio`` unused).
     """
     curve, was_1d = _as_2d(bp_year)
     M = curve.shape[0] - 1
     yrstoretire = max(0, retireage - age)
-    n_max = min(M, maxage - age, maxage - spage)
+    single = spage is None
+    if single:
+        n_max = min(M, maxage - age)
+    else:
+        n_max = min(M, maxage - age, maxage - spage)
     n_max = max(n_max, yrstoretire)
 
     Sx = _survival_curve(mort, age, n_max)
-    Sy = _survival_curve(mort, spage, n_max)
     n = np.arange(n_max + 1, dtype=float)
-    w = Sx * Sy + jsratio * (Sx + Sy - 2.0 * Sx * Sy)
-    w = w * (n >= yrstoretire)                       # pay only from retirement on
+    if single:
+        w = Sx                                        # single-life annuity
+    else:
+        Sy = _survival_curve(mort, spage, n_max)
+        w = Sx * Sy + jsratio * (Sx + Sy - 2.0 * Sx * Sy)
+    w = w * (n >= yrstoretire)                        # pay only from retirement on
 
     df = curve[: n_max + 1, :]                        # (n_max+1, S)
     wdf = w[:, None] * df                              # (n_max+1, S)

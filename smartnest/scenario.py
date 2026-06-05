@@ -108,7 +108,8 @@ def run_scenario(params: Parameters, participants: list[Participant],
 
         for t in range(1, maxyrs + 1):
             age += 1
-            spage += 1
+            if spage is not None:                      # None => single-life (no spouse)
+                spage += 1
             yrstoretire = p.retireage - age
             if yrstoretire < 0:
                 continue

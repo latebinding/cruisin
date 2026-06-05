@@ -31,7 +31,7 @@ class Participant:
     salary: float
     gender: int
     savings: float
-    spouse_age: int
+    spouse_age: int | None      # None => single-life (no spouse)
 
 
 def load_profile(path: str | None = None) -> list[Participant]:

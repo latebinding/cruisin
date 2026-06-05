@@ -87,6 +87,27 @@ def test_marriedlduration_reasonable():
     assert 0 < mliabdur < 30
 
 
+def test_marriedlduration_single_life():
+    # No spouse (spage=None): valid annuity factor, and cheaper than joint-and-survivor
+    mort = load_morttable()
+    bp = np.exp(-0.03 * np.arange(P.M + 1))
+    _, mq_joint = marriedlduration(mort, 60, 62, len(mort) - 1, bp,
+                                   P.convratio, P.jsratio, 58)
+    dur_single, mq_single = marriedlduration(mort, 60, 62, len(mort) - 1, bp,
+                                             P.convratio, P.jsratio, None)
+    assert mq_single > 0 and 0 < dur_single < 30
+    assert mq_single < mq_joint        # single-life annuity costs less than joint
+
+
+def test_scenario_single_life_runs():
+    from smartnest.dataio import Participant
+    mort = load_morttable()
+    p = Participant(1, 50, 90000, 1, 200000, None)
+    res = run_scenario(P, [p], mort, numsim=100)
+    assert np.all(np.isfinite(res.matrices["mininc"]))
+    assert res.matrices["mininc"][0][-1] > 0
+
+
 def test_hcduration_sentinel_and_sign():
     bp = np.exp(-0.03 * np.arange(P.M + 1))
     adj = np.full(25, 1000.0)
